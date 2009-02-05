@@ -129,14 +129,14 @@ class LinkBlog extends Plugin
 		}
 	}
 
-	// public function filter_post_permalink_atom($permalink, $post) {
-	// 	if($post->content_type == Post::type('link')) {
-	// 		return $post->info->url;
-	// 	}
-	// 	else {
-	// 		return $permalink;
-	// 	}
-	// }
+	public function filter_post_link($permalink, $post) {
+		if($post->content_type == Post::type('link')) {
+			return $post->info->url;
+		}
+		else {
+			return $permalink;
+		}
+	}
 	
 	public function filter_post_content_atom($content, $post) {
 		if($post->content_type == Post::type('link')) {
