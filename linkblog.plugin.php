@@ -45,6 +45,7 @@ class LinkBlog extends Plugin
 				case _t('Configure') :
 					$ui = new FormUI( strtolower( get_class( $this ) ) );
 					$ui->append( 'text', 'original_text', 'linkblog__original', _t('Text to use for describing original in feeds:') );
+					$ui->append( 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t('Override atom permalink with link URL') );
 					$ui->append( 'submit', 'save', _t('Save') );
 					$ui->out();
 					break;
@@ -72,7 +73,8 @@ class LinkBlog extends Plugin
 		$group->grant('post_link', 'read');
 		
 		// Set default settings
-		Options::set('linkblog__original', '<p><a href="{original}">Original</a></p>');
+		Options::set('linkblog__original', '<p><a href="{permalink}">Permalink</a></p>');
+		Options::set('linkblog__atom_permalink', false);
 		
 	}
 	
@@ -138,10 +140,20 @@ class LinkBlog extends Plugin
 		}
 	}
 	
+	public function filter_post_permalink_atom($permalink, $post) {
+		if($post->content_type == Post::type('link')) {
+			if(Options::get('linkblog__atom_permalink') == TRUE) {
+				return $post->info->url;
+			}
+		}
+		return $permalink;
+	}
+	
 	public function filter_post_content_atom($content, $post) {
 		if($post->content_type == Post::type('link')) {
 			$text= Options::get('linkblog__original');
 			$text= str_replace('{original}', $post->info->url, $text);
+			$text= str_replace('{permalink}', $post->permalink, $text);
 			return $content . $text;
 		}
 		else {
