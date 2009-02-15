@@ -1,5 +1,7 @@
 <?php
 
+require('linkhandler.php');
+
 class LinkBlog extends Plugin
 { 
 	
@@ -66,6 +68,18 @@ class LinkBlog extends Plugin
 	 **/
 	public function action_plugin_activation( $plugin_file )
 	{
+		self::install();
+	}
+	
+	public function action_plugin_deactivation( $plugin_file )
+	{
+		Post::deactivate_post_type( 'link' );
+	}
+	
+	/**
+	 * install various stuff we need
+	 */
+	static public function install() {
 		Post::add_new_type( 'link' );
 		
 		// Give anonymous users access
@@ -75,19 +89,13 @@ class LinkBlog extends Plugin
 		// Set default settings
 		Options::set('linkblog__original', '<p><a href="{permalink}">Permalink</a></p>');
 		Options::set('linkblog__atom_permalink', false);
-		
-	}
-	
-	public function action_plugin_deactivation( $plugin_file )
-	{
-		Post::deactivate_post_type( 'link' );
 	}
 	
 	/**
 	 * Register templates
 	 **/
 	public function action_init()
-	{
+	{		
 		// Create templates
 		$this->add_template('link.single', dirname(__FILE__) . '/link.single.php');
 	}
@@ -173,18 +181,26 @@ class LinkBlog extends Plugin
 	}
 	
 	/**
-	 * Filter the parameters passed to Posts::get()  in the Atomhandler.
-	 * @param $content_type. mixed. content types being passed.
-	 * @return array. content types with link type added.
-	 */
-	public function filter_atom_get_collection_content_type( $content_type )
+	 * Add needed rewrite rules
+	 **/
+	public function filter_rewrite_rules($rules)
 	{
-		$content_type = Utils::single_array( $content_type );
-		$content_type[] = Post::type( 'link' );
-		return $content_type;
+		$feed_regex= $feed_regex = implode( '|', LinkHandler::$feeds );
+		
+		$rules[] = new RewriteRule( array(
+					'name' => 'link_feed',
+					'parse_regex' => '%feed/(?P<name>' . $feed_regex . ')/?$%i',
+					'build_str' => 'feed/{$name}',
+					'handler' => 'LinkHandler',
+					'action' => 'feed',
+					'priority' => 7,
+					'is_active' => 1,
+					'description' => 'Displays the link feeds',
+				));
+				
+		return $rules;
 	}
 	
-
-}	
+}
 
 ?>
