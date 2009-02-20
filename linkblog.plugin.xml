@@ -1,0 +1,9 @@
+<plugin>
+	<name>LinkBlog</name>
+	<url>http://habariproject.org</url>
+	<author>Habari Community</author>
+	<authorurl>http://habariproject.org</authorurl>
+	<description>Allows the publishing of link-based posts, which show up in the main entry feed</description>
+	<license>ASL 2.0</license>
+</plugin>
+
