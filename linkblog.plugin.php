@@ -1,6 +1,7 @@
 <?php
 
 require('linkhandler.php');
+require('linkdatabase.php');
 
 class LinkBlog extends Plugin
 { 
@@ -15,7 +16,7 @@ class LinkBlog extends Plugin
 			'url' => 'http://habariproject.org',
 			'author' => 'Habari Community',
 			'authorurl' => 'http://habariproject.org',
-			'version' => 0.1,
+			'version' => 0.2,
 			'description' => 'Allows the publishing of link-based posts, which show up in the main entry feed',
 			'license' => 'ASL 2.0',
 		);
@@ -60,7 +61,7 @@ class LinkBlog extends Plugin
 	**/
 	public function action_update_check()
 	{
-		Update::add( $this->info->name, '1baf5dd5-8397-7db4-357e-ffa8b88697a1', $this->info->version );
+		Update::add( $this->info->name, '517e7fb2-77de-20b4-1996-feccd13ea0ba', $this->info->version );
 	}
 	
 	/**
@@ -89,6 +90,24 @@ class LinkBlog extends Plugin
 		// Set default settings
 		Options::set('linkblog__original', '<p><a href="{permalink}">Permalink</a></p>');
 		Options::set('linkblog__atom_permalink', false);
+		
+		self::database();
+	}
+	
+	/**
+	 * install database
+	 */
+	static public function database() {
+		$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
+		  `id` int(10) unsigned NOT NULL auto_increment,
+		  `post_id` int(10) unsigned NOT NULL,
+		  `date` int(10) unsigned NOT NULL,
+		  `type` int(5) unsigned NOT NULL,
+		  `ip` int(10) unsigned default NULL,
+		  `referrer` varchar(255) default NULL,
+		  PRIMARY KEY  (`id`)
+		);';
+		return DB::dbdelta( $q );
 	}
 	
 	/**
@@ -98,6 +117,39 @@ class LinkBlog extends Plugin
 	{		
 		// Create templates
 		$this->add_template('link.single', dirname(__FILE__) . '/link.single.php');
+		
+		// register tables
+		DB::register_table('link_traffic');
+		
+		// Add rewrite rules
+		$this->add_rule('"link"/"redirect"/slug', 'link_redirect');
+		
+		self::database();
+	}
+	
+	/**
+	 * Redirect a link to its original destination
+	 **/
+	public function action_plugin_act_link_redirect($handler)
+	{
+		$slug= $handler->handler_vars['slug'];
+		$post= Post::get(array('slug' => $slug));
+		
+		if($post == FALSE) {
+			$handler->theme->display('404');
+			exit;
+		}
+		
+		$type= Traffum::TYPE_SEND_NORMAL;
+		
+		if(isset($handler->handler_vars['refer']) && $handler->handler_vars['refer'] == 'atom') {
+			$type= Traffum::TYPE_SEND_ATOM;
+		}
+				
+		Traffum::create(array('post_id' => $post->id, 'type' => $type));
+		
+		Utils::redirect($post->link);
+		exit;
 	}
 	
 	/**
@@ -128,6 +180,30 @@ class LinkBlog extends Plugin
 	}
 	
 	/**
+	 * Initiate tracking on display
+	 */
+	function action_add_template_vars( $theme )
+	{
+		static $set= false;
+		
+		if($set == true || $theme->matched_rule->action != 'display_post' || $theme->post->content_type != Post::type('link')) {
+			return;
+		}
+		
+		$post= $theme->post;
+		
+		$type= Traffum::TYPE_VIEW_NORMAL;
+		
+		if(Controller::get_var('refer') != NULL && Controller::get_var('refer') == 'atom') {
+			$type= Traffum::TYPE_VIEW_ATOM;
+		}
+				
+		Traffum::create(array('post_id' => $post->id, 'type' => $type));
+		
+		$set= true;
+	}
+	
+	/**
 	 * Save our data to the database
 	 */
 	public function action_publish_post( $post, $form )
@@ -151,17 +227,39 @@ class LinkBlog extends Plugin
 	public function filter_post_permalink_atom($permalink, $post) {
 		if($post->content_type == Post::type('link')) {
 			if(Options::get('linkblog__atom_permalink') == TRUE) {
-				return $post->info->url;
+				return self::get_redirect_url($post, 'atom');
 			}
 		}
 		return $permalink;
 	}
 	
+	public static function get_redirect_url($post, $context = NULL) {
+		$params= array('slug' => $post->slug);
+				
+		if(isset($context) && $context == 'atom') {
+			$params['refer']= 'atom';
+		}
+		
+		$url= URL::get('link_redirect', $params);
+		
+		return $url;
+	}
+	
+	public static function get_permalink_url($post, $context = NULL) {
+		$url= $post->permalink;
+		
+		if(isset($context) && $context == 'atom') {
+			$url.= '?refer=atom';
+		}
+		
+		return $url;
+	}
+	
 	public function filter_post_content_atom($content, $post) {
 		if($post->content_type == Post::type('link')) {
 			$text= Options::get('linkblog__original');
-			$text= str_replace('{original}', $post->info->url, $text);
-			$text= str_replace('{permalink}', $post->permalink, $text);
+			$text= str_replace('{original}', self::get_redirect_url($post, 'atom'), $text);
+			$text= str_replace('{permalink}', self::get_permalink_url($post, 'atom'), $text);
 			return $content . $text;
 		}
 		else {
