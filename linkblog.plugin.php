@@ -148,7 +148,7 @@ class LinkBlog extends Plugin
 				
 		Traffum::create(array('post_id' => $post->id, 'type' => $type));
 		
-		Utils::redirect($post->link);
+		Utils::redirect($post->info->url);
 		exit;
 	}
 	
