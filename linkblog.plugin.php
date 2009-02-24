@@ -185,8 +185,8 @@ class LinkBlog extends Plugin
 	function action_add_template_vars( $theme )
 	{
 		static $set= false;
-		
-		if($set == true || $theme->matched_rule->action != 'display_post' || $theme->post->content_type != Post::type('link')) {
+				
+		if($set == true || !is_object($theme->matched_rule) || $theme->matched_rule->action != 'display_post' || $theme->post->content_type != Post::type('link')) {
 			return;
 		}
 		
