@@ -217,7 +217,7 @@ class LinkBlog extends Plugin
 
 	public function filter_post_link($permalink, $post) {
 		if($post->content_type == Post::type('link')) {
-			return $post->info->url;
+			return self::get_redirect_url($post);
 		}
 		else {
 			return $permalink;
