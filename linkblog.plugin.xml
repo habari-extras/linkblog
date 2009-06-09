@@ -1,9 +1,10 @@
-<plugin>
+<?xml version="1.0" encoding="utf-8" ?>
+<pluggable type="plugin">
 	<name>LinkBlog</name>
-	<url>http://habariproject.org</url>
-	<author>Habari Community</author>
-	<authorurl>http://habariproject.org</authorurl>
-	<description>Allows the publishing of link-based posts, which show up in the main entry feed</description>
-	<license>ASL 2.0</license>
-</plugin>
-
+	<license url="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Software License 2.0</license>
+	<author url="http://morgante.net/">Morgante Pell</author>
+	<version>0.2</version>
+	<url>http://morgante.net</url>
+	<description><![CDATA[Allows the publishing of link-based posts, which show up in the main entry feed.]]></description>
+	<copyright>2009</copyright>
+</pluggable>

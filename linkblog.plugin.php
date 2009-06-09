@@ -5,22 +5,6 @@ require('linkdatabase.php');
 
 class LinkBlog extends Plugin
 { 
-	
-	/**
-	 * Required plugin info() implementation provides info to Habari about this plugin.
-	 */ 
-	public function info()
-	{
-		return array (
-			'name' => 'LinkBlog',
-			'url' => 'http://habariproject.org',
-			'author' => 'Habari Community',
-			'authorurl' => 'http://habariproject.org',
-			'version' => 0.2,
-			'description' => 'Allows the publishing of link-based posts, which show up in the main entry feed',
-			'license' => 'ASL 2.0',
-		);
-	}
 
 	/**
 	 * Create help file
