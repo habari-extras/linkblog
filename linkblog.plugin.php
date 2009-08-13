@@ -263,6 +263,15 @@ class LinkBlog extends Plugin
 	}
 	
 	/**
+	 * Provide the alternate representation of the new feeds
+	 **/
+	public function filter_atom_get_collection_alternate_rules( $rules )
+	{
+		$rules['link_feed'] = 'display_home';
+		return $rules;
+	}
+	
+	/**
 	 * Add needed rewrite rules
 	 **/
 	public function filter_rewrite_rules($rules)
