@@ -108,14 +108,16 @@ class LinkBlog extends Plugin
 	 */
 	public function action_init()
 	{
+		// Add rewrite rules
+		// $this->add_rule('"link"/"redirect"/slug', 'link_redirect');
+		
 		// Create templates
 		$this->add_template('link.single', dirname(__FILE__) . '/link.single.php');
 
 		// register tables
 		DB::register_table('link_traffic');
 
-		// Add rewrite rules
-		$this->add_rule('"link"/"redirect"/slug', 'link_redirect');
+		// Utils::debug( RewriteRules::by_name('link_redirect'), URL::get('link_redirect', array('slug' => 'bob')) );
 
 		self::database();
 	}
@@ -228,6 +230,7 @@ class LinkBlog extends Plugin
 
 	public static function get_redirect_url($post, $context = NULL) {
 		$params= array('slug' => $post->slug);
+		
 
 		if(isset($context) && $context == 'atom') {
 			$params['refer']= 'atom';
@@ -288,15 +291,27 @@ class LinkBlog extends Plugin
 		$feed_regex= $feed_regex = implode( '|', LinkHandler::$feeds );
 
 		$rules[] = new RewriteRule( array(
-					'name' => 'link_feed',
-					'parse_regex' => '%feed/(?P<name>' . $feed_regex . ')/?$%i',
-					'build_str' => 'feed/{$name}',
-					'handler' => 'LinkHandler',
-					'action' => 'feed',
-					'priority' => 7,
-					'is_active' => 1,
-					'description' => 'Displays the link feeds',
-				));
+			'name' => 'link_feed',
+			'parse_regex' => '%feed/(?P<name>' . $feed_regex . ')/?$%i',
+			'build_str' => 'feed/{$name}',
+			'handler' => 'LinkHandler',
+			'action' => 'feed',
+			'priority' => 7,
+			'is_active' => 1,
+			'description' => 'Displays the link feeds',
+		));
+		// '"link"/"redirect"/slug', 'link_redirect');		
+		
+		$rules[] = new RewriteRule( array(
+			'name' => 'link_redirect',
+			'parse_regex' => '%link/redirect/(?P<slug>[^/]+)/?$%i',
+			'build_str' => 'link/redirect/{$slug}',
+			'handler' => 'PluginHandler',
+			'action' => 'link_redirect',
+			'priority' => 7,
+			'is_active' => 1,
+			'description' => 'Redirects to the linked item',
+		));
 
 		return $rules;
 	}
