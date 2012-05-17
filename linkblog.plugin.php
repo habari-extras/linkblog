@@ -51,15 +51,55 @@ class LinkBlog extends Plugin
 	 * install database
 	 */
 	static public function database() {
-		$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
-		  `id` int(10) unsigned NOT NULL auto_increment,
-		  `post_id` int(10) unsigned NOT NULL,
-		  `date` int(10) unsigned NOT NULL,
-		  `type` int(5) unsigned NOT NULL,
-		  `ip` int(10) unsigned default NULL,
-		  `referrer` varchar(255) default NULL,
-		  PRIMARY KEY  (`id`)
-		);';
+		
+		// $schema = Config::get('db_connection');
+		list( $schema, $remainder )= explode( ':', Config::get( 'db_connection' )->connection_string );
+		
+		switch( $schema )
+		{
+			case 'sqlite':
+				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
+				  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+				  post_id INTEGER NOT NULL,
+				  date INTEGER NOT NULL,
+				  type SMALLINTEGER NOT NULL,
+				  ip INTEGER default NULL,
+				  referrer VARCHAR(255) default NULL
+				);';
+				break;
+				
+			case 'mysql':
+			default:
+				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
+				  `id` int(10) unsigned NOT NULL auto_increment,
+				  `post_id` int(10) unsigned NOT NULL,
+				  `date` int(10) unsigned NOT NULL,
+				  `type` int(5) unsigned NOT NULL,
+				  `ip` int(10) unsigned default NULL,
+				  `referrer` varchar(255) default NULL,
+				  PRIMARY KEY  (`id`)
+				);';
+				
+		}
+		
+		// Utils::debug( $schema, $q );
+		
+		// CREATE TABLE {$prefix}posts (
+		// 		  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+		// 		  slug VARCHAR(255) NOT NULL,
+		// 		  content_type SMALLINTEGER NOT NULL,
+		// 		  title VARCHAR(255) NOT NULL,
+		// 		  guid VARCHAR(255) NOT NULL,
+		// 		  content TEXT NOT NULL,
+		// 		  cached_content LONGTEXT NOT NULL,
+		// 		  user_id SMALLINTEGER NOT NULL,
+		// 		  status SMALLINTEGER NOT NULL,
+		// 		  pubdate INTEGER NOT NULL,
+		// 		  updated INTEGER NOT NULL,
+		// 		  modified INTEGER NOT NULL
+		// 		);
+		
+		
 		return DB::dbdelta( $q );
 	}
 
