@@ -282,6 +282,16 @@ class LinkBlog extends Plugin
 		$rules['link_feed'] = 'display_home';
 		return $rules;
 	}
+	
+	/**
+	 * Add links to the main atom feed
+	 */
+	public function filter_atom_get_collection_content_type( $content_type )
+	{
+		$content_type = Utils::single_array( $content_type );
+		$content_type[] = Post::type( 'link' );
+		return $content_type;
+	}
 
 	/**
 	 * Add needed rewrite rules
