@@ -11,7 +11,8 @@ class LinkBlog extends Plugin
 	public function configure()
 	{
 		$ui = new FormUI( strtolower( get_class( $this ) ) );
-		$ui->append( 'text', 'original_text', 'linkblog__original', _t('Text to use for describing original in feeds:') );
+		$ui->append( 'textarea', 'original_text', 'linkblog__original', _t('Text to use for describing original in feeds:') );
+			$ui->original_text->rows = 2;
 		$ui->append( 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t('Override atom permalink with link URL') );
 		$ui->append( 'submit', 'save', _t('Save') );
 		return $ui;
