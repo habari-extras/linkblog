@@ -170,8 +170,10 @@ class LinkBlog extends Plugin
 	public function action_form_publish( $form, $post )
 	{
 		if ( $post->content_type == Post::type( 'link' ) ) {
-			$url= $form->append( 'text', 'url', 'null:null', _t( 'URL' ), 'admincontrol_text' );
-			$url->value= $post->info->url;
+			$url = $form->append( 'text', 'url', 'null:null', _t( 'URL' ), 'admincontrol_text' );
+			// CNS: If we're using this in conjunction with my modified version of the "Publish Quote" plugin, we might already have the URL in the handler_vars.
+			$vars = Controller::get_handler_vars();
+			$url->value = ( isset( $vars['url'] ) ) ? $vars['url'] : $post->info->url;
 			$form->move_after( $url, $form->title );
 
 		}
@@ -242,14 +244,14 @@ class LinkBlog extends Plugin
 			$params['refer'] = 'atom';
 		}
 
-		$url = URL::get(' link_redirect', $params );
+		$url = URL::get( 'link_redirect', $params );
 
 		return $url;
 	}
 
 	public static function get_permalink_url( $post, $context = null ) 
 	{
-		$url= $post->permalink;
+		$url = $post->permalink;
 
 		if ( isset( $context ) && $context == 'atom' ) {
 			$url .= '?refer=atom';
