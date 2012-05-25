@@ -260,6 +260,10 @@ class LinkBlog extends Plugin
 		return $url;
 	}
 
+	/**
+	 * Modify the atom content to include the permalink and change the URL, if 
+	 * configured to. 
+	 */
 	public function filter_post_content_atom( $content, $post ) 
 	{
 		if ( $post->content_type == Post::type( 'link' ) ) {
@@ -276,15 +280,30 @@ class LinkBlog extends Plugin
 	/**
 	 * Add the posts to the blog home
 	 */
+	/* */
 	public function filter_template_user_filters( $filters ) 
 	{
-		if ( isset( $filters['content_type'] ) ) {
-			$filters['content_type'] = Utils::single_array( $filters['content_type'] );
-			$filters['content_type'][] = Post::type( 'link' );
+		if ( isset( $filters['preset'] ) ) {
+			//$filters['preset'] = Utils::single_array( $filters['preset'] );
+			$filters['preset'] = 'links';
 		}
 		return $filters;
 	}
-
+	/* */
+	/**
+	 * Add my own preset
+	 * 
+	 * TODO: This seems very hacky to me.  I want to be able to merge with the currently defined presets
+	 * It also doesn't work for pages
+	 */
+	public function filter_posts_get_all_presets( $presets )
+	{
+		$presets['links'] = array( 'content_type' => array( Post::type( 'link' ), Post::type( 'entry' ) ), 
+										  'status' => Post::status( 'published' ), 
+										  'limit' => Options::get('pagination', 5) );
+		return $presets;
+	}
+	
 	/**
 	 * Provide the alternate representation of the new feeds
 	 */
