@@ -278,18 +278,24 @@ class LinkBlog extends Plugin
 	}
 
 	/**
-	 * Add the posts to the blog home
+	 * Add the posts to the blog home and it's pagination pages
 	 */
-	/* */
 	public function filter_template_user_filters( $filters ) 
 	{
+		// Cater for the home page which uses presets as of d918a831
 		if ( isset( $filters['preset'] ) ) {
 			//$filters['preset'] = Utils::single_array( $filters['preset'] );
 			$filters['preset'] = 'links';
+		} else {		
+			// Cater for other pages like /page/1 which don't use presets yet
+			if ( isset( $filters['content_type'] ) ) {
+				$filters['content_type'] = Utils::single_array( $filters['content_type'] );
+				$filters['content_type'][] = Post::type( 'link' );
+			}
 		}
 		return $filters;
 	}
-	/* */
+
 	/**
 	 * Add my own preset
 	 * 
@@ -298,9 +304,9 @@ class LinkBlog extends Plugin
 	 */
 	public function filter_posts_get_all_presets( $presets )
 	{
-		$presets['links'] = array( 'content_type' => array( Post::type( 'link' ), Post::type( 'entry' ) ), 
-										  'status' => Post::status( 'published' ), 
-										  'limit' => Options::get('pagination', 5) );
+		$presets['links'] = array(	'content_type' => array( Post::type( 'link' ), Post::type( 'entry' ) ), 
+									'status' => Post::status( 'published' ), 
+									'limit' => Options::get('pagination', 5) );
 		return $presets;
 	}
 	
