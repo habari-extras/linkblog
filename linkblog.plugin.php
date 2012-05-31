@@ -271,6 +271,21 @@ class LinkBlog extends Plugin
 			$filters['content_type']= Utils::single_array( $filters['content_type'] );
 			$filters['content_type'][]= Post::type('link');
 		}
+		
+		return $filters;
+	}
+	
+	public function filter_posts_get_update_preset( $filters, $presetname, $paramarray )
+	{
+		switch( $presetname )
+		{
+			case 'home':
+				$filters['content_type']= Utils::single_array( $filters['content_type'] );
+				$filters['content_type'][]= Post::type('link');
+				break;
+			default:
+				break;
+		}
 		return $filters;
 	}
 
