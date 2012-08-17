@@ -1,7 +1,7 @@
 <?php
 
-require('linkhandler.php');
-require('linkdatabase.php');
+require( 'linkhandler.php' );
+require( 'linkdatabase.php' );
 
 class LinkBlog extends Plugin
 {
@@ -11,9 +11,10 @@ class LinkBlog extends Plugin
 	public function configure()
 	{
 		$ui = new FormUI( strtolower( get_class( $this ) ) );
-		$ui->append( 'text', 'original_text', 'linkblog__original', _t('Text to use for describing original in feeds:') );
-		$ui->append( 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t('Override atom permalink with link URL') );
-		$ui->append( 'submit', 'save', _t('Save') );
+		$ui->append( 'textarea', 'original_text', 'linkblog__original', _t( 'Text to use for describing original in feeds:' ) );
+			$ui->original_text->rows = 2;
+		$ui->append( 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t( 'Override atom permalink with link URL' ) );
+		$ui->append( 'submit', 'save', _t( 'Save' ) );
 		return $ui;
 	}
 
@@ -33,16 +34,17 @@ class LinkBlog extends Plugin
 	/**
 	 * install various stuff we need
 	 */
-	static public function install() {
+	static public function install() 
+	{
 		Post::add_new_type( 'link' );
 
 		// Give anonymous users access
-		$group = UserGroup::get_by_name('anonymous');
-		$group->grant('post_link', 'read');
+		$group = UserGroup::get_by_name( 'anonymous' );
+		$group->grant( 'post_link', 'read' );
 
 		// Set default settings
-		Options::set('linkblog__original', '<p><a href="{permalink}">Permalink</a></p>');
-		Options::set('linkblog__atom_permalink', false);
+		Options::set( 'linkblog__original', '<p><a href="{permalink}">Permalink</a></p>' );
+		Options::set( 'linkblog__atom_permalink', false );
 
 		self::database();
 	}
@@ -50,15 +52,16 @@ class LinkBlog extends Plugin
 	/**
 	 * install database
 	 */
-	static public function database() {
+	static public function database() 
+	{
 		
 		// $schema = Config::get('db_connection');
-		list( $schema, $remainder )= explode( ':', Config::get( 'db_connection' )->connection_string );
+		list( $schema, $remainder ) = explode( ':', Config::get( 'db_connection' )->connection_string );
 		
 		switch( $schema )
 		{
 			case 'sqlite':
-				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
+				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table( 'link_traffic' ) . '(
 				  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 				  post_id INTEGER NOT NULL,
 				  date INTEGER NOT NULL,
@@ -70,7 +73,7 @@ class LinkBlog extends Plugin
 				
 			case 'mysql':
 			default:
-				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table('link_traffic') . '(
+				$q = 'CREATE TABLE IF NOT EXISTS ' . DB::table( 'link_traffic' ) . '(
 				  `id` int(10) unsigned NOT NULL auto_increment,
 				  `post_id` int(10) unsigned NOT NULL,
 				  `date` int(10) unsigned NOT NULL,
@@ -112,10 +115,10 @@ class LinkBlog extends Plugin
 		// $this->add_rule('"link"/"redirect"/slug', 'link_redirect');
 		
 		// Create templates
-		$this->add_template('link.single', dirname(__FILE__) . '/link.single.php');
+		$this->add_template( 'link.single', dirname( __FILE__ ) . '/link.single.php' );
 
 		// register tables
-		DB::register_table('link_traffic');
+		DB::register_table( 'link_traffic' );
 
 		// Utils::debug( RewriteRules::by_name('link_redirect'), URL::get('link_redirect', array('slug' => 'bob')) );
 
@@ -125,51 +128,53 @@ class LinkBlog extends Plugin
 	/**
 	 * Redirect a link to its original destination
 	 */
-	public function action_plugin_act_link_redirect($handler)
+	public function action_plugin_act_link_redirect( $handler )
 	{
 		$slug= $handler->handler_vars['slug'];
-		$post= Post::get(array('slug' => $slug));
+		$post= Post::get( array( 'slug' => $slug ) );
 
-		if($post == FALSE) {
-			$handler->theme->display('404');
+		if ( $post == false ) {
+			$handler->theme->display( '404' );
 			exit;
 		}
 
 		$type= Traffum::TYPE_SEND_NORMAL;
 
-		if(isset($handler->handler_vars['refer']) && $handler->handler_vars['refer'] == 'atom') {
-			$type= Traffum::TYPE_SEND_ATOM;
+		if ( isset( $handler->handler_vars['refer'] ) && $handler->handler_vars['refer'] == 'atom' ) {
+			$type = Traffum::TYPE_SEND_ATOM;
 		}
 
-		Traffum::create(array('post_id' => $post->id, 'type' => $type));
+		Traffum::create( array( 'post_id' => $post->id, 'type' => $type ) );
 
-		Utils::redirect($post->info->url);
+		Utils::redirect( $post->info->url );
 		exit;
 	}
 
 	/**
 	 * Create name string
 	 */
-	public function filter_post_type_display($type, $foruse)
+	public function filter_post_type_display( $type, $foruse )
 	{
 		$names = array(
 			'link' => array(
-				'singular' => _t('Link'),
-				'plural' => _t('Links'),
+				'singular' => _t( 'Link' ),
+				'plural' => _t( 'Links' ),
 			)
 		);
- 		return isset($names[$type][$foruse]) ? $names[$type][$foruse] : $type;
+ 		return isset( $names[$type][$foruse] ) ? $names[$type][$foruse] : $type;
 	}
 
 	/**
 	 * Modify publish form
 	 */
-	public function action_form_publish($form, $post)
+	public function action_form_publish( $form, $post )
 	{
-		if ($post->content_type == Post::type('link')) {
-			$url= $form->append('text', 'url', 'null:null', _t('URL'), 'admincontrol_text');
-			$url->value= $post->info->url;
-			$form->move_after($url, $form->title);
+		if ( $post->content_type == Post::type( 'link' ) ) {
+			$url = $form->append( 'text', 'url', 'null:null', _t( 'URL' ), 'admincontrol_text' );
+			// CNS: If we're using this in conjunction with my modified version of the "Publish Quote" plugin, we might already have the URL in the handler_vars.
+			$vars = Controller::get_handler_vars();
+			$url->value = ( isset( $vars['url'] ) ) ? $vars['url'] : $post->info->url;
+			$form->move_after( $url, $form->title );
 
 		}
 	}
@@ -179,9 +184,9 @@ class LinkBlog extends Plugin
 	 */
 	function action_add_template_vars( $theme )
 	{
-		static $set= false;
+		static $set = false;
 
-		if($set == true || !is_object($theme->matched_rule) || $theme->matched_rule->action != 'display_post' || $theme->post->content_type != Post::type('link')) {
+		if ( $set == true || !is_object( $theme->matched_rule ) || $theme->matched_rule->action != 'display_post' || $theme->post->content_type != Post::type( 'link' ) ) {
 			return;
 		}
 
@@ -189,13 +194,13 @@ class LinkBlog extends Plugin
 
 		$type= Traffum::TYPE_VIEW_NORMAL;
 
-		if(Controller::get_var('refer') != NULL && Controller::get_var('refer') == 'atom') {
+		if ( Controller::get_var( 'refer' ) != null && Controller::get_var( 'refer' ) == 'atom' ) {
 			$type= Traffum::TYPE_VIEW_ATOM;
 		}
 
-		Traffum::create(array('post_id' => $post->id, 'type' => $type));
+		Traffum::create( array( 'post_id' => $post->id, 'type' => $type ) );
 
-		$set= true;
+		$set = true;
 	}
 
 	/**
@@ -203,59 +208,68 @@ class LinkBlog extends Plugin
 	 */
 	public function action_publish_post( $post, $form )
 	{
-		if ($post->content_type == Post::type('link')) {
-			$this->action_form_publish($form, $post);
+		if ( $post->content_type == Post::type( 'link' ) ) {
+			$this->action_form_publish( $form, $post );
 
-			$post->info->url= $form->url->value;
+			$post->info->url = $form->url->value;
 		}
 	}
 
-	public function filter_post_link($permalink, $post) {
-		if($post->content_type == Post::type('link')) {
-			return self::get_redirect_url($post);
+	public function filter_post_link( $permalink, $post ) 
+	{
+		if ( $post->content_type == Post::type( 'link' ) ) {
+			return self::get_redirect_url( $post );
 		}
 		else {
 			return $permalink;
 		}
 	}
 
-	public function filter_post_permalink_atom($permalink, $post) {
-		if($post->content_type == Post::type('link')) {
-			if(Options::get('linkblog__atom_permalink') == TRUE) {
-				return self::get_redirect_url($post, 'atom');
+	public function filter_post_permalink_atom( $permalink, $post ) 
+	{
+		if ( $post->content_type == Post::type( 'link' ) ) {
+			if ( Options::get( 'linkblog__atom_permalink' ) == true ) {
+				return self::get_redirect_url( $post, 'atom' );
 			}
 		}
 		return $permalink;
 	}
 
-	public static function get_redirect_url($post, $context = NULL) {
-		$params= array('slug' => $post->slug);
+	public static function get_redirect_url( $post, $context = null ) 
+	{
+		$params = array( 'slug' => $post->slug );
 		
 
-		if(isset($context) && $context == 'atom') {
-			$params['refer']= 'atom';
+		if ( isset( $context ) && $context == 'atom' ) {
+			$params['refer'] = 'atom';
 		}
 
-		$url= URL::get('link_redirect', $params);
+		$url = URL::get( 'link_redirect', $params );
 
 		return $url;
 	}
 
-	public static function get_permalink_url($post, $context = NULL) {
-		$url= $post->permalink;
+	public static function get_permalink_url( $post, $context = null ) 
+	{
+		$url = $post->permalink;
 
-		if(isset($context) && $context == 'atom') {
-			$url.= '?refer=atom';
+		if ( isset( $context ) && $context == 'atom' ) {
+			$url .= '?refer=atom';
 		}
 
 		return $url;
 	}
 
-	public function filter_post_content_atom($content, $post) {
-		if($post->content_type == Post::type('link')) {
-			$text= Options::get('linkblog__original');
-			$text= str_replace('{original}', self::get_redirect_url($post, 'atom'), $text);
-			$text= str_replace('{permalink}', self::get_permalink_url($post, 'atom'), $text);
+	/**
+	 * Modify the atom content to include the permalink and change the URL, if 
+	 * configured to. 
+	 */
+	public function filter_post_content_atom( $content, $post ) 
+	{
+		if ( $post->content_type == Post::type( 'link' ) ) {
+			$text = Options::get( 'linkblog__original' );
+			$text = str_replace( '{original}', self::get_redirect_url( $post, 'atom' ), $text );
+			$text = str_replace( '{permalink}', self::get_permalink_url( $post, 'atom' ), $text );
 			return $content . $text;
 		}
 		else {
@@ -264,12 +278,20 @@ class LinkBlog extends Plugin
 	}
 
 	/**
-	 * Add the posts to the blog home
+	 * Add the posts to the blog home and it's pagination pages
 	 */
-	public function filter_template_user_filters($filters) {
-		if(isset($filters['content_type'])) {
-			$filters['content_type']= Utils::single_array( $filters['content_type'] );
-			$filters['content_type'][]= Post::type('link');
+	public function filter_template_user_filters( $filters ) 
+	{
+		// Cater for the home page which uses presets as of d918a831
+		if ( isset( $filters['preset'] ) ) {
+			//$filters['preset'] = Utils::single_array( $filters['preset'] );
+			$filters['preset'] = 'links';
+		} else {		
+			// Cater for other pages like /page/1 which don't use presets yet
+			if ( isset( $filters['content_type'] ) ) {
+				$filters['content_type'] = Utils::single_array( $filters['content_type'] );
+				$filters['content_type'][] = Post::type( 'link' );
+			}
 		}
 		
 		return $filters;
@@ -290,6 +312,20 @@ class LinkBlog extends Plugin
 	}
 
 	/**
+	 * Add my own preset
+	 * 
+	 * TODO: This seems very hacky to me.  I want to be able to merge with the currently defined presets
+	 * It also doesn't work for pages
+	 */
+	public function filter_posts_get_all_presets( $presets )
+	{
+		$presets['links'] = array(	'content_type' => array( Post::type( 'link' ), Post::type( 'entry' ) ), 
+									'status' => Post::status( 'published' ), 
+									'limit' => Options::get('pagination', 5) );
+		return $presets;
+	}
+	
+	/**
 	 * Provide the alternate representation of the new feeds
 	 */
 	public function filter_atom_get_collection_alternate_rules( $rules )
@@ -297,11 +333,21 @@ class LinkBlog extends Plugin
 		$rules['link_feed'] = 'display_home';
 		return $rules;
 	}
+	
+	/**
+	 * Add links to the main atom feed
+	 */
+	public function filter_atom_get_collection_content_type( $content_type )
+	{
+		$content_type = Utils::single_array( $content_type );
+		$content_type[] = Post::type( 'link' );
+		return $content_type;
+	}
 
 	/**
 	 * Add needed rewrite rules
 	 */
-	public function filter_rewrite_rules($rules)
+	public function filter_rewrite_rules( $rules )
 	{
 		$feed_regex= $feed_regex = implode( '|', LinkHandler::$feeds );
 
@@ -314,7 +360,7 @@ class LinkBlog extends Plugin
 			'priority' => 7,
 			'is_active' => 1,
 			'description' => 'Displays the link feeds',
-		));
+		) );
 		// '"link"/"redirect"/slug', 'link_redirect');		
 		
 		$rules[] = new RewriteRule( array(
@@ -326,7 +372,7 @@ class LinkBlog extends Plugin
 			'priority' => 7,
 			'is_active' => 1,
 			'description' => 'Redirects to the linked item',
-		));
+		) );
 
 		return $rules;
 	}
