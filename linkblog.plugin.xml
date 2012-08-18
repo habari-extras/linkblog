@@ -4,7 +4,7 @@
 	<license url="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Software License 2.0</license>
 	<author url="http://morgante.net/">Morgante Pell</author>
 	<author url="http://habariproject.org/">The Habari Community</author>
-	<version>0.3</version>
+	<version>0.3.1</version>
 	<url>http://lab.morgante.net/linkblog</url>
 	<description><![CDATA[Allows the publishing of link-based posts, which show up in the main entry feed.]]></description>
 	<copyright>2009</copyright>
@@ -12,4 +12,9 @@
 	<help>
 		<value><![CDATA[<p>LinkBlog allows you to create posts with specific links attached to them.</p><h3>Installation Instructions</h3><p>Your theme needs to have a <code>link.single</code> template, or a generic <code>single</code> template. If it does not, you can usually copy <code>entry.single</code> to <code>link.single</code> and use it.</p>]]></value>
 	</help>
+	
+	<provides>
+		<feature url="http://wiki.habariproject.org/en/feature/linkblog">linkblog</feature>
+	</provides>
+	
 </pluggable> 

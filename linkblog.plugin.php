@@ -278,15 +278,13 @@ class LinkBlog extends Plugin
 	}
 
 	/**
-	 * Add the posts to the blog home and it's pagination pages
+	 * Add links to places where entries are displayed in the conventional way (not a preset)
 	 */
 	public function filter_template_user_filters( $filters ) 
-	{
-		// Cater for the home page which uses presets as of d918a831
-		if ( isset( $filters['preset'] ) ) {
-			//$filters['preset'] = Utils::single_array( $filters['preset'] );
-			$filters['preset'] = 'links';
-		} else {		
+	{				
+		// We handle presets seperately; this is just for old-style searches
+		if ( !isset( $filters['preset'] ) )
+		{
 			// Cater for other pages like /page/1 which don't use presets yet
 			if ( isset( $filters['content_type'] ) ) {
 				$filters['content_type'] = Utils::single_array( $filters['content_type'] );
@@ -298,7 +296,7 @@ class LinkBlog extends Plugin
 	}
 	
 	public function filter_posts_get_update_preset( $filters, $presetname, $paramarray )
-	{
+	{		
 		switch( $presetname )
 		{
 			case 'home':
@@ -309,20 +307,6 @@ class LinkBlog extends Plugin
 				break;
 		}
 		return $filters;
-	}
-
-	/**
-	 * Add my own preset
-	 * 
-	 * TODO: This seems very hacky to me.  I want to be able to merge with the currently defined presets
-	 * It also doesn't work for pages
-	 */
-	public function filter_posts_get_all_presets( $presets )
-	{
-		$presets['links'] = array(	'content_type' => array( Post::type( 'link' ), Post::type( 'entry' ) ), 
-									'status' => Post::status( 'published' ), 
-									'limit' => Options::get('pagination', 5) );
-		return $presets;
 	}
 	
 	/**
