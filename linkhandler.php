@@ -1,4 +1,5 @@
 <?php
+namespace Habari;
 /**
 	* LinkHandler class
 	* Produces link specific RSS2 and Atom feeds

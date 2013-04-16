@@ -1,5 +1,5 @@
 <?php
-
+namespace Habari;
 require( 'linkhandler.php' );
 require( 'linkdatabase.php' );
 
@@ -11,10 +11,9 @@ class LinkBlog extends Plugin
 	public function configure()
 	{
 		$ui = new FormUI( strtolower( get_class( $this ) ) );
-		$ui->append( 'textarea', 'original_text', 'linkblog__original', _t( 'Text to use for describing original in feeds:' ) );
-			$ui->original_text->rows = 2;
-		$ui->append( 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t( 'Override atom permalink with link URL' ) );
-		$ui->append( 'submit', 'save', _t( 'Save' ) );
+		$ui->append( FormControlLabel::wrap( _t( 'Text to use for describing original in feeds:' ), FormControlText::create( 'original_text', 'linkblog__original' ) ) );
+		// $ui->append( FormControlLabel::wrap( FormControlCheck 'checkbox', 'atom_permalink', 'linkblog__atom_permalink', _t( 'Override atom permalink with link URL' ) );
+		$ui->append( FormControlSubmit::create('submit')->set_caption( _t( 'Save' ) ) );
 		return $ui;
 	}
 
@@ -170,12 +169,11 @@ class LinkBlog extends Plugin
 	public function action_form_publish( $form, $post )
 	{
 		if ( $post->content_type == Post::type( 'link' ) ) {
-			$url = $form->append( 'text', 'url', 'null:null', _t( 'URL' ), 'admincontrol_text' );
+			$url = $form->append( FormControlLabel::wrap( _t("URL"), FormControlText::create( 'url', 'null:null') ) );
 			// CNS: If we're using this in conjunction with my modified version of the "Publish Quote" plugin, we might already have the URL in the handler_vars.
 			$vars = Controller::get_handler_vars();
-			$url->value = ( isset( $vars['url'] ) ) ? $vars['url'] : $post->info->url;
-			$form->move_after( $url, $form->title );
-
+			$form->url->set_value( ( isset( $vars['url'] ) ) ? $vars['url'] : $post->info->url );
+			//$form->move_after( $url, $form->title );
 		}
 	}
 

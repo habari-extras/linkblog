@@ -1,4 +1,5 @@
 <?php
+namespace Habari;
 /**
 	* Linkdatabase
 	* Interacts with the database for links
@@ -26,7 +27,7 @@ class Traffum extends QueryRecord
 		return array(
 			'id' => 0,
 			'post_id' => 0,
-			'date' => HabariDateTime::date_create(),
+			'date' => DateTime::date_create(),
 			'type' => self::TYPE_VIEW_NORMAL,
 			'ip' => sprintf("%u", ip2long( $_SERVER['REMOTE_ADDR'] ) ),
 			'referrer' => $_SERVER['HTTP_REFERER']

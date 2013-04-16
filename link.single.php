@@ -1,4 +1,5 @@
-<?php $theme->display ( 'header'); ?>
+<?php namespace Habari;
+$theme->display ( 'header'); ?>
 <!-- entry.single -->
   <div class="single">
    <div id="primary">
